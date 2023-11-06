@@ -62,13 +62,20 @@ int envoie_recois_name(int socketfd)
 {
 
   char data[1024];
-  // la réinitialisation de l'ensemble des données
-  memset(data, 0, sizeof(data));
+  strcpy(data,"nom");
 
-  strcpy(data,"test");
+  char hostname[256];
+  gethostname(hostname, sizeof(hostname));
 
-  int write_status = write(socketfd, data, strlen(data));
+  int write_status = write(socketfd, data, 1024);
   if (write_status < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+  int write_status2 = write(socketfd, hostname, 256);
+  if (write_status2 < 0)
   {
     perror("erreur ecriture");
     exit(EXIT_FAILURE);
@@ -76,6 +83,7 @@ int envoie_recois_name(int socketfd)
 
   // la réinitialisation de l'ensemble des données
   memset(data, 0, sizeof(data));
+  memset(hostname, 0, sizeof(hostname));
 
   // lire les données de la socket
   int read_status = read(socketfd, data, sizeof(data));
@@ -177,7 +185,7 @@ int main(int argc, char **argv)
   {
     // envoyer et recevoir un message
     envoie_recois_message(socketfd);
-  }else if(argv[1]=="nom"){
+  }else if(strcmp(argv[1],"nom")==0){
     envoie_recois_name(socketfd);
   }
 

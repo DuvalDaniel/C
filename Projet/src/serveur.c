@@ -123,6 +123,29 @@ int renvoie_message(int client_socket_fd, char *data)
   return (EXIT_SUCCESS);
 }
 
+int renvoie_name(int client_socket_fd, char *data)
+{
+    char hostname[256];
+
+    // lecture de données envoyées par un client
+    int data_size = read(client_socket_fd, hostname, sizeof(hostname));
+
+    if (data_size < 0)
+    {
+      perror("erreur lecture");
+      return (EXIT_FAILURE);
+    }else{
+      int data_size2 = write(client_socket_fd, (void *)hostname, sizeof(hostname));
+      if (data_size2 < 0)
+    {
+      perror("erreur lecture");
+      return (EXIT_FAILURE);
+    }
+    }
+  memset(hostname, 0, sizeof(hostname));
+  return (EXIT_SUCCESS);
+}
+
 
 /* accepter la nouvelle connection d'un client et lire les données
  * envoyées par le client. En suite, le serveur envoie un message
@@ -143,7 +166,7 @@ int recois_envoie_message(int client_socket_fd, char data[1024])
   {
     renvoie_message(client_socket_fd, data);
   // Si le message commence par le mot 'name'
-  }if (strcmp(code, "name") == 0)
+  }if (strcmp(code, "nom") == 0)
   {
     renvoie_name(client_socket_fd, data);
   }
@@ -232,9 +255,9 @@ int main()
       return (EXIT_FAILURE);
     }
     if(strcmp(data,"nom")==0){
-    printf("nom");
+    renvoie_name(client_socket_fd, data);
     }
-    recois_envoie_message(client_socket_fd, data);
+    //recois_envoie_message(client_socket_fd, data);
   }
 
   return 0;
