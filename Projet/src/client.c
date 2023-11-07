@@ -98,6 +98,67 @@ int envoie_recois_name(int socketfd)
   return 0;
 }
 
+int envoie_operateur_numeros(int socketfd, char** argv){
+  char data[1024];
+  strcpy(data,argv[1]);
+
+  char operande[256];
+  strcpy(operande,argv[3]);
+
+  char numero1[256];
+  strcpy(numero1,argv[4]);
+
+  char numero2[256];
+  strcpy(numero2,argv[5]);
+
+  int write_status = write(socketfd, data, 1024);
+  if (write_status < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+  int write_status2 = write(socketfd, operande, 256);
+  if (write_status2 < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+  int write_status3 = write(socketfd, numero1, 256);
+  if (write_status3 < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+  int write_status4 = write(socketfd, numero2, 256);
+  if (write_status4 < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+  // la réinitialisation de l'ensemble des données
+  memset(data, 0, sizeof(data));
+  memset(operande, 0, sizeof(operande));
+  memset(numero1, 0, sizeof(numero1));
+  memset(numero2, 0, sizeof(numero2));
+
+  char reponse[256];
+
+  // lire les données de la socket
+  int read_status = read(socketfd, reponse, sizeof(reponse));
+  if (read_status < 0)
+  {
+    perror("erreur lecture");
+    return -1;
+  }
+
+  printf("Resultat: %s\n", reponse);
+
+  return 0;
+}
+
 void analyse(char *pathname, char *data)
 {
   // compte de couleurs
@@ -181,12 +242,14 @@ int main(int argc, char **argv)
     perror("connection serveur");
     exit(EXIT_FAILURE);
   }
-  if (argc != 2)
+  if (strcmp(argv[1],"message")==0)
   {
     // envoyer et recevoir un message
     envoie_recois_message(socketfd);
   }else if(strcmp(argv[1],"nom")==0){
     envoie_recois_name(socketfd);
+  }else if(strcmp(argv[1],"calcul")==0){
+    envoie_operateur_numeros(socketfd, argv);
   }
 
   /*else

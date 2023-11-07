@@ -146,6 +146,122 @@ int renvoie_name(int client_socket_fd, char *data)
   return (EXIT_SUCCESS);
 }
 
+int recois_numeros_calcule(int client_socket_fd, char *data){
+  char operande[256];
+
+  char numero1[256];
+  char numero2[256];
+
+  char resultat[256];
+
+  float resulatFloat;
+
+  // lecture de données envoyées par un client
+    int data_size = read(client_socket_fd, operande, sizeof(operande));
+    if (data_size < 0)
+    {
+      perror("erreur lecture");
+      return (EXIT_FAILURE);
+    }else{
+      int data_size2 = read(client_socket_fd, numero1, sizeof(numero1));
+      if (data_size2 < 0)
+      {
+        perror("erreur lecture");
+        return (EXIT_FAILURE);
+      }else{
+        int data_size3 = read(client_socket_fd, numero2, sizeof(numero2));
+        if (data_size3 < 0)
+        {
+          perror("erreur lecture");
+          return (EXIT_FAILURE);
+        }else{
+          if(strcmp(operande, "+") == 0){
+            
+            resulatFloat = atof(numero1) + atof(numero2);
+            int datat_float = snprintf(resultat, sizeof(resultat), "%.2f", resulatFloat); 
+            if (datat_float < 0)
+            {
+              perror("erreur lecture");
+              return (EXIT_FAILURE);
+            }
+            int data_size11 = write(client_socket_fd, resultat, sizeof(resultat));
+            if (data_size11 < 0)
+            {
+              perror("erreur lecture");
+              return (EXIT_FAILURE);
+            }
+          }else if(strcmp(operande, "-") == 0){
+            resulatFloat = atof(numero1) - atof(numero2);
+            int datat_float = snprintf(resultat, sizeof(resultat), "%.2f", resulatFloat); 
+            if (datat_float < 0)
+            {
+              perror("erreur lecture");
+              return (EXIT_FAILURE);
+            }
+
+            int data_size12 = write(client_socket_fd, resultat, sizeof(resultat));
+            if (data_size12 < 0)
+            {
+              perror("erreur lecture");
+              return (EXIT_FAILURE);
+            }
+          }else if(strcmp(operande, "*") == 0){
+            //ATTENTION si on veut faire une multiplication on doit mettre * entre guillemets ("*") exemple : ./client calcul : "*" 3 3
+            resulatFloat = atof(numero1) * atof(numero2);
+            int datat_float = snprintf(resultat, sizeof(resultat), "%.2f", resulatFloat); 
+            if (datat_float < 0)
+            {
+              perror("erreur lecture");
+              return (EXIT_FAILURE);
+            }
+
+            int data_size13 = write(client_socket_fd, resultat, sizeof(resultat));
+            if (data_size13 < 0)
+            {
+              perror("erreur lecture");
+              return (EXIT_FAILURE);
+            }
+          }else if(strcmp(operande, "/") == 0){
+            if(atof(numero2)==0){
+              strcpy(resultat, "Impossible de diviser un chiffre par zero");
+              int data_size14 = write(client_socket_fd, resultat, sizeof(resultat));
+              if (data_size14 < 0)
+              {
+                perror("erreur lecture");
+                return (EXIT_FAILURE);
+              }
+            }
+            resulatFloat = atof(numero1) / atof(numero2);
+            int datat_float = snprintf(resultat, sizeof(resultat), "%.2f", resulatFloat); 
+            if (datat_float < 0)
+            {
+              perror("erreur lecture");
+              return (EXIT_FAILURE);
+            }
+
+            int data_size14 = write(client_socket_fd, resultat, sizeof(resultat));
+            if (data_size14 < 0)
+            {
+              perror("erreur lecture");
+              return (EXIT_FAILURE);
+            }
+          }else{
+
+          }
+
+
+
+        }
+      }
+    }
+
+    memset(operande, 0, sizeof(operande));
+    memset(numero1, 0, sizeof(numero1));
+    memset(numero2, 0, sizeof(numero2));
+    return (EXIT_SUCCESS);
+
+}
+
 
 /* accepter la nouvelle connection d'un client et lire les données
  * envoyées par le client. En suite, le serveur envoie un message
@@ -165,10 +281,6 @@ int recois_envoie_message(int client_socket_fd, char data[1024])
   if (strcmp(code, "message:") == 0)
   {
     renvoie_message(client_socket_fd, data);
-  // Si le message commence par le mot 'name'
-  }if (strcmp(code, "nom") == 0)
-  {
-    renvoie_name(client_socket_fd, data);
   }
   else
   {
@@ -256,6 +368,8 @@ int main()
     }
     if(strcmp(data,"nom")==0){
     renvoie_name(client_socket_fd, data);
+    }else if(strcmp(data,"calcul")==0){
+    recois_numeros_calcule(client_socket_fd, data);
     }
     //recois_envoie_message(client_socket_fd, data);
   }
