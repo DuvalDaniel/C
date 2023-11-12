@@ -22,7 +22,6 @@ couleur_compteur *analyse_bmp_image(char *nom_de_fichier)
 {
 
   couleur_compteur *cc = NULL;
-
   // l'ouverture du fichier pour la lecture
   int fd = open(nom_de_fichier, O_RDONLY);
   printf("%s", nom_de_fichier);
@@ -34,7 +33,7 @@ couleur_compteur *analyse_bmp_image(char *nom_de_fichier)
 
   bmp_header bheader;
   bmp_info_header binfo_header;
-
+  
   // la lecture de l'en-tête du fichier pour en connaître la taille et le type
   ssize_t compte = read(fd, &bheader, sizeof(bheader));
   if (compte < 0)
@@ -42,13 +41,14 @@ couleur_compteur *analyse_bmp_image(char *nom_de_fichier)
     perror("Erreur: read");
     return (NULL);
   }
-
   // Vérifier l'en-tête pour voir si le fichier est une image de format BMP
+  printf("%d/n",bheader.type);
   if (bheader.type != 0x4D42)
   {
+    printf("%d/n",bheader.type);
+    puts("eeeeeee");
     return (NULL);
   }
-
   /* Obtenir l'information indiquant si l'image utilise 3 (RGB) ou 4 (RGBA)
    * octets pour stocker une seule couleur
    */
@@ -58,7 +58,6 @@ couleur_compteur *analyse_bmp_image(char *nom_de_fichier)
     perror("Erreur: read");
     return (NULL);
   }
-
   // Se positionner correctement pour commencer à lire les couleurs
   off_t offset = lseek(fd, bheader.offset, SEEK_SET);
   if (offset != bheader.offset)
@@ -83,6 +82,7 @@ couleur_compteur *analyse_bmp_image(char *nom_de_fichier)
     c.c.c32 = c32;
     cc = compte_couleur(&c, binfo_header.taille_image / 4);
     trier_couleur_compteur(cc);
+  
   }
   else if (binfo_header.compte_bit == 24)
   {

@@ -191,12 +191,36 @@ void analyse(char *pathname, char *data)
   data[strlen(data) - 1] = '\0';
 }
 
+int envoie_couleurs1(int socketfd, char *argv[]){
+  int nb_couleurs;
+  nb_couleurs = atoi(argv[3]);
+  if(nb_couleurs > 30){
+    perror("trop de couleurs");
+    exit(EXIT_FAILURE);
+  }
+  char tableau_couleurs[nb_couleurs][10];
+
+  for (int i = 4; i< nb_couleurs+4; ++i){
+    printf("%d\n",i);
+    size_t longueur = strlen(argv[i]);
+    strcpy(tableau_couleurs[i], argv[i]);
+    tableau_couleurs[i][longueur - 1] = '\0';
+    printf("%s\n",tableau_couleurs[i]);
+  }
+
+  /*for (int i = 0; i<nb_couleurs; ++i){
+    printf("%s\n", tableau_couleurs[i]);
+  }*/
+
+  return 0;
+
+}
+
 int envoie_couleurs(int socketfd, char *pathname)
 {
   char data[1024];
   memset(data, 0, sizeof(data));
   analyse(pathname, data);
-
   int write_status = write(socketfd, data, strlen(data));
   if (write_status < 0)
   {
@@ -250,7 +274,10 @@ int main(int argc, char **argv)
     envoie_recois_name(socketfd);
   }else if(strcmp(argv[1],"calcul")==0){
     envoie_operateur_numeros(socketfd, argv);
+  }else if(strcmp(argv[1],"couleurs")==0){
+    envoie_couleurs1(socketfd, argv);
   }
+
 
   /*else
   {
