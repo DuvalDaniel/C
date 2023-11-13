@@ -195,22 +195,125 @@ int envoie_couleurs1(int socketfd, char *argv[]){
   int nb_couleurs;
   nb_couleurs = atoi(argv[3]);
   if(nb_couleurs > 30){
-    perror("trop de couleurs");
+    perror("trop de balises");
     exit(EXIT_FAILURE);
   }
   char tableau_couleurs[nb_couleurs][10];
 
   for (int i = 4; i< nb_couleurs+4; ++i){
-    printf("%d\n",i);
+    if(i == nb_couleurs+3){
+      strcpy(tableau_couleurs[i-4], argv[i]);
+    }else{
     size_t longueur = strlen(argv[i]);
-    strcpy(tableau_couleurs[i], argv[i]);
-    tableau_couleurs[i][longueur - 1] = '\0';
-    printf("%s\n",tableau_couleurs[i]);
+    strcpy(tableau_couleurs[i-4], argv[i]);
+    tableau_couleurs[i-4][longueur - 1] = '\0';
+    }
   }
 
-  /*for (int i = 0; i<nb_couleurs; ++i){
-    printf("%s\n", tableau_couleurs[i]);
-  }*/
+  //envoie des sockets
+
+  char data[1024];
+  strcpy(data,argv[1]);
+
+  int write_status2 = write(socketfd, data, 1024);
+  if (write_status2 < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+  
+  int write_status = write(socketfd, &nb_couleurs, sizeof(int));
+  if (write_status < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+
+  int write_status3 = write(socketfd, tableau_couleurs, sizeof(tableau_couleurs));
+  if (write_status3 < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+  //reponse du serveur
+
+  char reponse[256];
+
+  // lire les données de la socket
+  int read_status = read(socketfd, reponse, sizeof(reponse));
+  if (read_status < 0)
+  {
+    perror("erreur lecture");
+    return -1;
+  }
+
+  printf("Couleurs enregistrés dans le fichier : %s\n", reponse);
+
+  return 0;
+
+}
+
+int envoie_balises(int socketfd, char *argv[]){
+  int nb_balises;
+  nb_balises = atoi(argv[3]);
+  if(nb_balises > 30){
+    perror("trop de couleurs");
+    exit(EXIT_FAILURE);
+  }
+  char tableau_couleurs[nb_balises][64];
+
+  for (int i = 4; i< nb_balises+4; ++i){
+    if(i == nb_balises+3){
+      strcpy(tableau_couleurs[i-4], argv[i]);
+    }else{
+    size_t longueur = strlen(argv[i]);
+    strcpy(tableau_couleurs[i-4], argv[i]);
+    tableau_couleurs[i-4][longueur - 1] = '\0';
+    }
+  }
+
+  //envoie des sockets
+
+  char data[1024];
+  strcpy(data,argv[1]);
+
+  int write_status2 = write(socketfd, data, 1024);
+  if (write_status2 < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+  
+  int write_status = write(socketfd, &nb_balises, sizeof(int));
+  if (write_status < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+
+  int write_status3 = write(socketfd, tableau_couleurs, sizeof(tableau_couleurs));
+  if (write_status3 < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+  //reponse du serveur
+
+  char reponse[256];
+
+  // lire les données de la socket
+  int read_status = read(socketfd, reponse, sizeof(reponse));
+  if (read_status < 0)
+  {
+    perror("erreur lecture");
+    return -1;
+  }
+
+  printf("Balises enregistrés dans le fichier : %s\n", reponse);
 
   return 0;
 
@@ -276,6 +379,8 @@ int main(int argc, char **argv)
     envoie_operateur_numeros(socketfd, argv);
   }else if(strcmp(argv[1],"couleurs")==0){
     envoie_couleurs1(socketfd, argv);
+  }else if(strcmp(argv[1],"balises")==0){
+    envoie_balises(socketfd, argv);
   }
 
 

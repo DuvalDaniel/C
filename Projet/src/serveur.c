@@ -262,6 +262,118 @@ int recois_numeros_calcule(int client_socket_fd, char *data){
 
 }
 
+int recois_couleurs(int client_socket_fd, char data[1024]){
+
+  int nb_couleurs;
+
+
+  int data_size = read(client_socket_fd, &nb_couleurs, sizeof(int));
+    if (data_size < 0)
+    {
+      perror("erreur lecture");
+      return (EXIT_FAILURE);
+    }
+  
+  char tableau_couleurs[nb_couleurs][10];
+
+  int data_size2 = read(client_socket_fd, tableau_couleurs, sizeof(tableau_couleurs));
+    if (data_size2 < 0)
+    {
+      perror("erreur lecture");
+      return (EXIT_FAILURE);
+    }
+
+  FILE *fichierw = fopen("couleurs.txt", "w");
+
+    if (fichierw == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir le fichier.\n");
+        return 1;
+    }
+
+    // Ferme le fichier après l'avoir ouvert, ce qui efface son contenu
+  fclose(fichierw);
+
+  FILE *fichiera = fopen("couleurs.txt", "a");
+
+    if (fichiera == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir le fichier.\n");
+        return 1;
+    }
+
+    // Ajoute du contenu à la fin du fichier sans écraser
+  for (int i = 0; i < nb_couleurs; ++i) {
+    fprintf(fichiera,"%s\n", tableau_couleurs[i]);
+  }
+
+  fclose(fichiera);
+
+  char nom_fichier[256] = "couleurs.txt";
+  int data_size1 = write(client_socket_fd, nom_fichier, sizeof(nom_fichier));
+    if (data_size1 < 0)
+    {
+      perror("erreur lecture");
+      return (EXIT_FAILURE);
+    }  
+
+  return 0;
+}
+
+int recois_balises(int client_socket_fd, char data[1024]){
+
+  int nb_balises;
+
+
+  int data_size = read(client_socket_fd, &nb_balises, sizeof(int));
+    if (data_size < 0)
+    {
+      perror("erreur lecture");
+      return (EXIT_FAILURE);
+    }
+  
+  char tableau_couleurs[nb_balises][64];
+
+  int data_size2 = read(client_socket_fd, tableau_couleurs, sizeof(tableau_couleurs));
+    if (data_size2 < 0)
+    {
+      perror("erreur lecture");
+      return (EXIT_FAILURE);
+    }
+
+  FILE *fichierw = fopen("balises.txt", "w");
+
+    if (fichierw == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir le fichier.\n");
+        return 1;
+    }
+
+    // Ferme le fichier après l'avoir ouvert, ce qui efface son contenu
+  fclose(fichierw);
+
+  FILE *fichiera = fopen("balises.txt", "a");
+
+    if (fichiera == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir le fichier.\n");
+        return 1;
+    }
+
+    // Ajoute du contenu à la fin du fichier sans écraser
+  for (int i = 0; i < nb_balises; ++i) {
+    fprintf(fichiera,"%s\n", tableau_couleurs[i]);
+  }
+
+  fclose(fichiera);
+
+  char nom_fichier[256] = "balises.txt";
+  int data_size1 = write(client_socket_fd, nom_fichier, sizeof(nom_fichier));
+    if (data_size1 < 0)
+    {
+      perror("erreur lecture");
+      return (EXIT_FAILURE);
+    }  
+
+  return 0;
+}
+
 
 /* accepter la nouvelle connection d'un client et lire les données
  * envoyées par le client. En suite, le serveur envoie un message
@@ -370,8 +482,13 @@ int main()
     renvoie_name(client_socket_fd, data);
     }else if(strcmp(data,"calcul")==0){
     recois_numeros_calcule(client_socket_fd, data);
+    }else if(strcmp(data,"couleurs")==0){
+    recois_couleurs(client_socket_fd, data);
+    }else if(strcmp(data,"balises")==0){
+    recois_balises(client_socket_fd, data);
     }
     //recois_envoie_message(client_socket_fd, data);
+
   }
 
   return 0;
