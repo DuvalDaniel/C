@@ -272,7 +272,6 @@ int recois_couleurs(int client_socket_fd, char data[1024]){
       perror("erreur lecture");
       return (EXIT_FAILURE);
     }
-  printf("%d\n",nb_couleurs);
   char tableau_couleurs[nb_couleurs][10];
 
   int data_size2 = read(client_socket_fd, tableau_couleurs, sizeof(tableau_couleurs));
@@ -281,7 +280,6 @@ int recois_couleurs(int client_socket_fd, char data[1024]){
       perror("erreur lecture");
       return (EXIT_FAILURE);
     }
-
   FILE *fichierw = fopen("couleurs.txt", "w");
 
     if (fichierw == NULL) {
@@ -485,8 +483,9 @@ int main()
     recois_couleurs(client_socket_fd, data);
     }else if(strcmp(data,"balises")==0){
     recois_balises(client_socket_fd, data);
+    }else{
+    recois_envoie_message(client_socket_fd, data);
     }
-    //recois_envoie_message(client_socket_fd, data);
 
   }
 

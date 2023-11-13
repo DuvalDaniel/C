@@ -42,11 +42,8 @@ couleur_compteur *analyse_bmp_image(char *nom_de_fichier)
     return (NULL);
   }
   // Vérifier l'en-tête pour voir si le fichier est une image de format BMP
-  printf("%d/n",bheader.type);
   if (bheader.type != 0x4D42)
   {
-    printf("%d/n",bheader.type);
-    puts("eeeeeee");
     return (NULL);
   }
   /* Obtenir l'information indiquant si l'image utilise 3 (RGB) ou 4 (RGBA)

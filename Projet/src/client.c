@@ -21,13 +21,12 @@
  * Il faut un argument : l'identifiant de la socket
  */
 
-int envoie_recois_message(int socketfd)
+int envoie_recois_message(int socketfd, char contenu=0)
 {
 
   char data[1024];
   // la réinitialisation de l'ensemble des données
   memset(data, 0, sizeof(data));
-
   // Demandez à l'utilisateur d'entrer un message
   char message[1024];
   printf("Votre message (max 1000 caracteres): ");
@@ -159,7 +158,7 @@ int envoie_operateur_numeros(int socketfd, char** argv){
   return 0;
 }
 
-void analyse(char *pathname, char data[][10])
+void analyse(char *pathname, char data[][10], char nb_couleurs)
 {
   // compte de couleurs
   couleur_compteur *cc = analyse_bmp_image(pathname);
@@ -174,7 +173,7 @@ void analyse(char *pathname, char data[][10])
   // strcat(data, temp_string);
 
   // choisir 10 couleurs
-  for (count = 0; count < 10 && cc->size - count > 0; count++)
+  for (count = 0; count <= nb_couleurs && cc->size - count > 0; count++)
   {
     if (cc->compte_bit == BITS32)
     {
@@ -319,11 +318,53 @@ int envoie_balises(int socketfd, char *argv[]){
 
 }
 
-int envoie_couleurs(int socketfd, char *pathname)
+int json(int socketfd){
+       // Déclaration des variables
+    char input[500];
+    char codeValue[50];
+    char valeursValue[50];
+
+    // Lecture de l'entrée depuis la console avec fgets
+    printf("Veuillez entrer un JSON : ");
+    if (fgets(input, sizeof(input), stdin) == NULL) {
+        fprintf(stderr, "Erreur lors de la lecture de l'entrée.\n");
+        return 1;
+    }
+
+    // Utilisation de sscanf pour extraire les valeurs de "code" et "valeurs"
+    if (sscanf(input, "{\"code\":\"%49[^\"]\",\"valeurs\":[\"%49[^\"]]}", codeValue, valeursValue) != 2) {
+        fprintf(stderr, "Erreur lors de l'extraction des valeurs de 'code' et 'valeurs'.\n");
+        return 1;
+    }
+
+    // Affichage des valeurs extraites
+    printf("Valeur de 'code' : %s\n", codeValue);
+    printf("Valeur de 'valeurs' : %s\n", valeursValue);
+
+    // char command[1024]
+
+    // sprintf()
+
+    if(strcmp(codeValue, "message")==0){
+      envoie_recois_message(socketfd);
+      //system(valeursValue);
+    }
+
+    return 0;
+}
+
+int envoie_couleurs(int socketfd, char *argv[])
 {
-  char data[10][10]={{0}};
+  int taille = atoi(argv[2]);
+  //on verifie si on nous demande pas une taille superieur a 30
+  if(taille > 30){
+    perror("taille trop grande");
+    exit(EXIT_FAILURE);
+  }
+
+  char data[taille][10];
   memset(data, 0, sizeof(data));
-  analyse(pathname, data);
+  analyse(argv[1], data, taille);
 
   char data1[1024];
   strcpy(data1,"couleurs");
@@ -334,10 +375,6 @@ int envoie_couleurs(int socketfd, char *pathname)
     perror("erreur ecriture");
     exit(EXIT_FAILURE);
   }
-
-  int taille = 10;
-
-  exit(EXIT_FAILURE);
 
   int write_status1 = write(socketfd, &taille, sizeof(int));
   if (write_status1 < 0)
@@ -403,10 +440,12 @@ int main(int argc, char **argv)
     envoie_couleurs1(socketfd, argv);
   }else if(strcmp(argv[1],"balises")==0){
     envoie_balises(socketfd, argv);
+  }else if(strcmp(argv[1],"JSON")==0){
+    json(socketfd);
   }else{
     // envoyer et recevoir les couleurs prédominantes
     // d'une image au format BMP (argv[1])
-    envoie_couleurs(socketfd, argv[1]);
+    envoie_couleurs(socketfd, argv);
   }
 
   close(socketfd);
