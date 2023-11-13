@@ -266,14 +266,13 @@ int recois_couleurs(int client_socket_fd, char data[1024]){
 
   int nb_couleurs;
 
-
   int data_size = read(client_socket_fd, &nb_couleurs, sizeof(int));
     if (data_size < 0)
     {
       perror("erreur lecture");
       return (EXIT_FAILURE);
     }
-  
+  printf("%d\n",nb_couleurs);
   char tableau_couleurs[nb_couleurs][10];
 
   int data_size2 = read(client_socket_fd, tableau_couleurs, sizeof(tableau_couleurs));

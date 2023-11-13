@@ -159,36 +159,36 @@ int envoie_operateur_numeros(int socketfd, char** argv){
   return 0;
 }
 
-void analyse(char *pathname, char *data)
+void analyse(char *pathname, char data[][10])
 {
   // compte de couleurs
   couleur_compteur *cc = analyse_bmp_image(pathname);
 
   int count;
-  strcpy(data, "couleurs: ");
-  char temp_string[10] = "10,";
-  if (cc->size < 10)
-  {
-    sprintf(temp_string, "%d,", cc->size);
-  }
-  strcat(data, temp_string);
+  //strcpy(data, "couleurs: ");
+  char temp_string[10];
+  // if (cc->size < 10)
+  // {
+  //   sprintf(temp_string, "%d,", cc->size);
+  // }
+  // strcat(data, temp_string);
 
   // choisir 10 couleurs
-  for (count = 1; count < 11 && cc->size - count > 0; count++)
+  for (count = 0; count < 10 && cc->size - count > 0; count++)
   {
     if (cc->compte_bit == BITS32)
     {
-      sprintf(temp_string, "#%02x%02x%02x,", cc->cc.cc24[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
+      sprintf(temp_string, "#%02x%02x%02x", cc->cc.cc24[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
     }
     if (cc->compte_bit == BITS24)
     {
-      sprintf(temp_string, "#%02x%02x%02x,", cc->cc.cc32[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
+      sprintf(temp_string, "#%02x%02x%02x", cc->cc.cc32[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
     }
-    strcat(data, temp_string);
+    strcpy(data[count], temp_string);
   }
 
   // enlever le dernier virgule
-  data[strlen(data) - 1] = '\0';
+  //data[strlen(data) - 1] = '\0';
 }
 
 int envoie_couleurs1(int socketfd, char *argv[]){
@@ -321,11 +321,33 @@ int envoie_balises(int socketfd, char *argv[]){
 
 int envoie_couleurs(int socketfd, char *pathname)
 {
-  char data[1024];
+  char data[10][10]={{0}};
   memset(data, 0, sizeof(data));
   analyse(pathname, data);
-  int write_status = write(socketfd, data, strlen(data));
+
+  char data1[1024];
+  strcpy(data1,"couleurs");
+
+  int write_status = write(socketfd, data1, 1024);
   if (write_status < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+  int taille = 10;
+
+  exit(EXIT_FAILURE);
+
+  int write_status1 = write(socketfd, &taille, sizeof(int));
+  if (write_status1 < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+  int write_status2 = write(socketfd, data, sizeof(data));
+  if (write_status2 < 0)
   {
     perror("erreur ecriture");
     exit(EXIT_FAILURE);
@@ -381,15 +403,11 @@ int main(int argc, char **argv)
     envoie_couleurs1(socketfd, argv);
   }else if(strcmp(argv[1],"balises")==0){
     envoie_balises(socketfd, argv);
-  }
-
-
-  /*else
-  {
+  }else{
     // envoyer et recevoir les couleurs prédominantes
     // d'une image au format BMP (argv[1])
     envoie_couleurs(socketfd, argv[1]);
-  }*/
+  }
 
   close(socketfd);
 }
